@@ -1,56 +1,1217 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <!-- 
-      This is an HTML comment
-      You can write text in a comment and the content won't be visible in the page
-    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Earn Tokens App - v2.6.3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Comic+Neue:wght@400;700&display=stylesheet" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', 'Comic Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
+            position: relative;
+        }
 
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="https://glitch.com/favicon.ico" />
+        body.dark-mode {
+            background: linear-gradient(135deg, #1c2526, #2d3436);
+            color: #ffffff;
+        }
 
-  <!--
-      This is the page head - it contains info the browser uses
-      Like the title, which appears on the browser tab but not inside the page
-      Further down you'll see the content that displays in the page
-    -->
-  <title>Hello World!</title>
+        body.light-mode {
+            background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+            color: #2d3436;
+        }
 
-  <!-- The website stylesheet -->
-  <link rel="stylesheet" href="/style.css" />
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 700px;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
 
-  <!-- The website JavaScript file -->
-  <script src="/script.js" defer></script>
+        .cartoon-character {
+            position: fixed;
+            bottom: 150px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            background: url('https://cdn.pixabay.com/photo/2017/08/06/11/28/cartoon-character.png') no-repeat center/contain;
+            z-index: 2000;
+            animation: bounce 2s infinite ease-in-out;
+            transition: transform 0.3s ease;
+        }
+
+        .cartoon-character:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        .button {
+            background: #2d3436;
+            color: #ffffff;
+            border: none;
+            padding: 18px 36px;
+            font-size: 22px;
+            font-weight: 600;
+            border-radius: 16px;
+            cursor: pointer;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .light-mode .button {
+            background: #ffffff;
+            color: #2d3436;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), inset 0 -2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .light-mode .button:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .tokens {
+            font-size: 48px;
+            font-weight: 700;
+            margin: 30px 0;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+            letter-spacing: 1.2px;
+            animation: glow 1.5s infinite alternate;
+        }
+
+        .dark-mode .tokens {
+            color: #ffffff;
+        }
+
+        .light-mode .tokens {
+            color: #2d3436;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 6px rgba(255, 255, 255, 0.6); }
+            100% { text-shadow: 0 0 12px rgba(255, 255, 255, 0.8); }
+        }
+
+        .light-mode @keyframes glow {
+            0% { text-shadow: 0 0 6px rgba(0, 0, 0, 0.2); }
+            100% { text-shadow: 0 0 12px rgba(0, 0, 0, 0.3); }
+        }
+
+        .progress-container {
+            width: 90%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            margin: 20px 0;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .light-mode .progress-container {
+            background: rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-bar {
+            height: 25px;
+            background: linear-gradient(90deg, #00b4d8, #48cae4);
+            width: 0%;
+            transition: width 0.8s ease-in-out;
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .light-mode .popup-overlay {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .popup-overlay.active {
+            opacity: 1;
+        }
+
+        .popup-content {
+            background: #2d3436;
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            width: 90%;
+            max-width: 300px;
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .light-mode .popup-content {
+            background: #ffffff;
+            color: #2d3436;
+            border: 2px solid rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .popup-overlay.active .popup-content {
+            transform: scale(1);
+        }
+
+        .popup-character {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 70px;
+            background: url('https://cdn.pixabay.com/photo/2017/08/06/11/28/cartoon-character.png') no-repeat center/contain;
+            animation: bounce 1.5s infinite ease-in-out;
+        }
+
+        .popup-ad-container {
+            width: 300px;
+            height: 250px;
+            margin: 10px auto;
+        }
+
+        .popup-close-btn {
+            background: #3b4b4d;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        .light-mode .popup-close-btn {
+            background: #e9ecef;
+            color: #2d3436;
+        }
+
+        .popup-close-btn:hover {
+            background: #4c5e60;
+            transform: translateY(-2px);
+        }
+
+        .light-mode .popup-close-btn:hover {
+            background: #ced4da;
+        }
+
+        .ad-banner-bottom {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            min-height: 90px;
+            z-index: 1000;
+            background: #1c2526;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .light-mode .ad-banner-bottom {
+            background: #f0f4f8;
+        }
+
+        .token-icon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            z-index: 2000;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            padding: 10px;
+            background: #2d3436;
+        }
+
+        .light-mode .token-icon {
+            border: 2px solid rgba(0, 0, 0, 0.2);
+            background: #ffffff;
+        }
+
+        .token-icon:hover {
+            transform: scale(1.1);
+            filter: brightness(1.2);
+        }
+
+        .token-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .withdraw-button {
+            background: #2d3436;
+            color: #ffffff;
+            border: none;
+            padding: 14px 28px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 15px 0;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .light-mode .withdraw-button {
+            background: #ffffff;
+            color: #2d3436;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .withdraw-button:hover {
+            background: #3b4b4d;
+            transform: translateY(-2px);
+        }
+
+        .light-mode .withdraw-button:hover {
+            background: #e9ecef;
+        }
+
+        .daily-bonus {
+            background: #2d3436;
+            color: #ffffff;
+            border: none;
+            padding: 16px 32px;
+            font-size: 20px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .light-mode .daily-bonus {
+            background: #ffffff;
+            color: #2d3436;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .daily-bonus:hover {
+            background: #3b4b4d;
+            transform: translateY(-2px);
+        }
+
+        .light-mode .daily-bonus:hover {
+            background: #e9ecef;
+        }
+
+        .spin-button {
+            background: #2d3436;
+            color: #ffffff;
+            border: none;
+            padding: 16px 32px;
+            font-size: 20px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .light-mode .spin-button {
+            background: #ffffff;
+            color: #2d3436;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .spin-button:hover {
+            background: #3b4b4d;
+            transform: translateY(-2px);
+        }
+
+        .light-mode .spin-button:hover {
+            background: #e9ecef;
+        }
+
+        .custom-alert {
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2d3436;
+            padding: 12px;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1500;
+            max-width: 80%;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .light-mode .custom-alert {
+            background: #ffffff;
+            color: #2d3436;
+            border: 2px solid rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .custom-alert.active {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .sidebar {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #2d3436;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .light-mode .sidebar {
+            background: #ffffff;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .sidebar-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            z-index: 2100;
+            background: #2d3436;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .light-mode .sidebar-toggle {
+            background: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.1);
+            filter: brightness(1.2);
+        }
+
+        .sidebar-item {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-item:hover {
+            transform: scale(1.1);
+        }
+
+        .sidebar-item i, .sidebar-item select, .sidebar-item span {
+            font-size: 20px;
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+        }
+
+        .light-mode .sidebar-item i, .light-mode .sidebar-item select, .light-mode .sidebar-item span {
+            color: #2d3436;
+            text-shadow: none;
+        }
+
+        .sidebar-item select {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 14px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .light-mode .sidebar-item select {
+            color: #2d3436;
+        }
+
+        .sidebar-item.telegram { background: #26A5E4; }
+        .sidebar-item.youtube { background: #FF0000; }
+        .sidebar-item.facebook { background: #4267B2; }
+        .sidebar-item.game { background: #FFD700; }
+        .sidebar-item.support { background: #25D366; }
+        .sidebar-item.leaderboard { background: #6c757d; }
+        .sidebar-item.daily-counter { background: #17a2b8; }
+        .sidebar-item.music-control { background: #ff6f61; }
+
+        .ai-watermark {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            z-index: 1000;
+        }
+
+        .light-mode .ai-watermark {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        @media (max-width: 768px) {
+            .button, .daily-bonus, .withdraw-button, .spin-button {
+                padding: 14px 28px;
+                font-size: 18px;
+            }
+            .tokens {
+                font-size: 40px;
+                margin: 25px 0;
+            }
+            .popup-content {
+                padding: 20px;
+                max-width: 300px;
+            }
+            .custom-alert {
+                font-size: 16px;
+                padding: 10px;
+                max-width: 85%;
+            }
+            .cartoon-character {
+                width: 100px;
+                height: 100px;
+                bottom: 130px;
+            }
+            .token-icon {
+                width: 35px;
+                height: 35px;
+            }
+            .ad-banner-bottom {
+                min-height: 90px;
+            }
+            .sidebar-toggle {
+                width: 45px;
+                height: 45px;
+            }
+            .sidebar {
+                bottom: 90px;
+                padding: 10px;
+            }
+            .sidebar-item {
+                width: 35px;
+                height: 35px;
+            }
+            .sidebar-item i, .sidebar-item select, .sidebar-item span {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .button, .daily-bonus, .withdraw-button, .spin-button {
+                padding: 12px 24px;
+                font-size: 16px;
+            }
+            .tokens {
+                font-size: 36px;
+            }
+            .popup-content {
+                padding: 15px;
+                max-width: 300px;
+            }
+            .custom-alert {
+                font-size: 14px;
+                padding: 8px;
+                max-width: 90%;
+            }
+            .cartoon-character {
+                width: 80px;
+                height: 80px;
+            }
+            .token-icon {
+                width: 30px;
+                height: 30px;
+            }
+            .ad-banner-bottom {
+                min-height: 90px;
+            }
+            .sidebar-toggle {
+                width: 40px;
+                height: 40px;
+            }
+            .sidebar {
+                bottom: 80px;
+                padding: 8px;
+            }
+            .sidebar-item {
+                width: 30px;
+                height: 30px;
+            }
+            .sidebar-item i, .sidebar-item select, .sidebar-item span {
+                font-size: 16px;
+            }
+        }
+    </style>
 </head>
+<body class="dark-mode">
+    <div class="particles" id="particles-js"></div>
 
-<body>
-  <!--
-      The body includes the content you see in the page
-      Each element is defined using tags, like this <div></div>
-      The attributes like class="wrapper" let us style elements in the CSS
-    -->
-  <div class="wrapper">
-    <div class="content" role="main">
-      <h1 class="title">Oh hi website!</h1>
-      <img src="/cool-website.svg" class="illustration" alt="cool website" />
-      <div class="instructions">
-        <p>
-          Fork <a href="https://github.com/glitchdotcom/website-to-compute">this project</a> and open it in a GitHub Codespace.
-        </p>
-        <p> Follow the steps in the README to deploy your new website to Fastly in a few steps!
-        </p>
+    <div class="container">
+        <div class="cartoon-character" id="cartoonCharacter" title="Your Token Buddy!"></div>
 
-      </div>
-
-      <footer class="footer">
-        <div>
-          <a class="remix" href="https://github.com/glitchdotcom/website-to-compute">🚧 Get your own site</a>
+        <div class="ad-banner-bottom" id="bannerContainer">
+            <!-- ✅ Banner Ad: 728x90 -->
+            <script type="text/javascript">
+                atOptions = {
+                    'key': 'a913b9c3488c985314c21e929f3917fe',
+                    'format': 'iframe',
+                    'height': 90,
+                    'width': 728,
+                    'params': {}
+                };
+            </script>
+            <script type="text/javascript" src="//www.highperformanceformat.com/a913b9c3488c985314c21e929f3917fe/invoke.js"></script>
         </div>
-      </footer>
-    </div>
-  </div>
-</body>
 
+        <div class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-bars" style="font-size: 24px;"></i>
+        </div>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-item" id="themeToggle" title="Toggle Theme">
+                <i class="fas fa-moon"></i>
+            </div>
+            <div class="sidebar-item daily-counter" id="dailyCounter" title="Daily Reward Countdown">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="sidebar-item leaderboard" id="leaderboard" title="Token Leaderboard">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <div class="sidebar-item support" title="User Support">
+                <a href="https://wa.me/917715952502?text=Support%20Request%20for%20Earn%20Tokens%20App" target="_blank">
+                    <i class="fas fa-headset"></i>
+                </a>
+            </div>
+            <div class="sidebar-item telegram" title="Join Telegram">
+                <a href="https://t.me/+oH_SUvWSbEA5NWE1" target="_blank"><i class="fab fa-telegram-plane"></i></a>
+            </div>
+            <div class="sidebar-item youtube" title="Watch on YouTube">
+                <a href="https://youtube.com/@technicaldesi7?si=pCf0zLsiegPsBN_U" target="_blank"><i class="fab fa-youtube"></i></a>
+            </div>
+            <div class="sidebar-item facebook" title="Follow on Facebook">
+                <a href="https://www.facebook.com/share/1FX8T3JgmY/?mibextid=qi2Omg" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            </div>
+            <div class="sidebar-item game" title="Play Game">
+                <a href="https://9734.play.gamezop.com" target="_blank"><i class="fas fa-gamepad"></i></a>
+            </div>
+            <div class="sidebar-item music-control" id="musicControl" title="Toggle Music">
+                <i class="fas fa-volume-up"></i>
+            </div>
+        </div>
+
+        <div class="tokens" id="tokensDisplay">Tokens: 0</div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <button class="daily-bonus" id="dailyBonusButton" style="display: none;">
+            <i class="fas fa-gift"></i> Claim Daily Bonus
+        </button>
+
+        <button class="button" id="watchAdButton">Get More Tokens</button>
+
+        <button class="spin-button" id="spinButton">Spin for Bonus!</button>
+
+        <div class="token-icon" id="tokenIcon" title="Withdraw Tokens">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgWADOL_CTLn8o1dFRo4ppnAOWe5JeWdErFxHu2mwRybPaMUgOlp2kfOKoBItKBnOLtCBpiY1mJgCq4eJNtoiy0ZIVpkHFUI-qWy2mqvJPaDqPPF7zCF3EemCm0-Dnyoh-c813xqxBD97VdHqKC4oCHNIVCtnCfS7cUrGvcsgNbHhx9kiofNBY8PaTi07I/s450/1000343585.gif" 
+                 style="cursor: pointer; width: 100%; height: 100%; object-fit: contain;" 
+                 alt="Wallet Icon">
+        </div>
+
+        <div class="popup-overlay" id="popupOverlay">
+            <div class="popup-content">
+                <div class="popup-character"></div>
+                <div class="popup-ad-container">
+                    <!-- ✅ Popup Ad: 300x250 -->
+                    <script type="text/javascript">
+                        atOptions = {
+                            'key': 'f7dfdf37c5811dcdb2f63752bb50877d',
+                            'format': 'iframe',
+                            'height': 250,
+                            'width': 300,
+                            'params': {}
+                        };
+                    </script>
+                    <script type="text/javascript" src="//www.highperformanceformat.com/f7dfdf37c5811dcdb2f63752bb50877d/invoke.js"></script>
+                </div>
+                <button class="popup-close-btn">Close</button>
+            </div>
+        </div>
+
+        <button class="withdraw-button" id="withdrawButton">Withdraw</button>
+
+        <div class="custom-alert" id="customAlert"></div>
+
+        <div class="ai-watermark">Powered by AI - v2.6.3</div>
+
+        <!-- Audio Elements -->
+        <audio id="clickSound" preload="auto"></audio>
+        <audio id="successSound" preload="auto"></audio>
+        <audio id="bgMusic" preload="auto" loop></audio>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Simulate production mode
+        const isProduction = true;
+
+        // Particle.js Configuration
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 30, density: { enable: true, value_area: 800 } },
+                color: { value: '#ffffff' },
+                shape: { type: 'circle', stroke: { width: 0, color: '#000000' } },
+                opacity: { value: 0.4, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false } },
+                size: { value: 2, random: true, anim: { enable: true, speed: 1, size_min: 0.2, sync: false } },
+                line_linked: { enable: false },
+                move: { enable: true, speed: 1.5, direction: 'none', random: true, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: false }, onclick: { enable: true, mode: 'push' }, resize: true },
+                modes: { push: { particles_nb: 3 } }
+            },
+            retina_detect: true
+        });
+
+        // DOM Element References with Safety Checks
+        const getElement = (id) => {
+            const el = document.getElementById(id);
+            if (!el) console.warn(`Element with ID "${id}" not found`);
+            return el;
+        };
+
+        const watchAdButton = getElement('watchAdButton');
+        const withdrawButton = getElement('withdrawButton');
+        const popupOverlay = getElement('popupOverlay');
+        const popupCloseBtn = document.querySelector('.popup-close-btn');
+        const tokensDisplay = getElement('tokensDisplay');
+        const progressBar = getElement('progressBar');
+        const dailyBonusButton = getElement('dailyBonusButton');
+        const spinButton = getElement('spinButton');
+        const customAlert = getElement('customAlert');
+        const clickSound = getElement('clickSound');
+        const successSound = getElement('successSound');
+        const bgMusic = getElement('bgMusic');
+        const tokenIcon = getElement('tokenIcon');
+        const themeToggle = getElement('themeToggle');
+        const musicControl = getElement('musicControl');
+        const cartoonCharacter = getElement('cartoonCharacter');
+        const sidebarToggle = getElement('sidebarToggle');
+        const sidebar = getElement('sidebar');
+        const dailyCounter = getElement('dailyCounter');
+        const leaderboard = getElement('leaderboard');
+        const bannerContainer = getElement('bannerContainer');
+
+        // State Variables
+        let tokens = localStorage.getItem('tokens') ? parseInt(localStorage.getItem('tokens')) : 0;
+        let clickCount = 0;
+        let lastSpinDate = localStorage.getItem('lastSpinDate') ? parseInt(localStorage.getItem('lastSpinDate')) : null;
+        let canSpin = true;
+        let lastWithdrawalDate = localStorage.getItem('lastWithdrawalDate') ? parseInt(localStorage.getItem('lastWithdrawalDate')) : null;
+        let hasWithdrawn = localStorage.getItem('hasWithdrawn') === 'true';
+        let lastClaimDate = localStorage.getItem('lastClaimDate') ? parseInt(localStorage.getItem('lastClaimDate')) : null;
+        let dailyBonusAvailable = false;
+        let isMusicPlaying = false;
+        let isAudioInitialized = false;
+        let hasRedirected = false;
+
+        if (tokensDisplay) tokensDisplay.textContent = `Tokens: ${tokens}`;
+        if (progressBar) updateProgressBar();
+
+        // Initialize Theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.body.classList.add(`${savedTheme}-mode`);
+        if (themeToggle) themeToggle.innerHTML = savedTheme === 'light' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+
+        // Audio Initialization with Format Detection
+        function initializeAudioSources() {
+            const audioFiles = [
+                { element: clickSound, mp3: 'https://www.soundjay.com/buttons/beep-02.mp3', ogg: 'https://www.soundjay.com/buttons/beep-02.ogg' },
+                { element: bgMusic, mp3: 'https://www.bensound.com/bensound-music/bensound-sunny.mp3', ogg: 'https://www.bensound.com/bensound-music/bensound-sunny.ogg' },
+                { element: successSound, mp3: 'https://www.soundjay.com/buttons/success.mp3', ogg: 'https://www.soundjay.com/buttons/success.ogg' }
+            ];
+
+            audioFiles.forEach(({ element, mp3, ogg }) => {
+                if (element) {
+                    if (element.canPlayType('audio/mpeg')) {
+                        element.src = mp3;
+                    } else if (element.canPlayType('audio/ogg')) {
+                        element.src = ogg;
+                    } else {
+                        console.warn(`No supported audio format for ${element.id}`);
+                    }
+                    element.load();
+                    element.onerror = function(e) {
+                        console.warn(`Sound failed for ${element.id}:`, e);
+                    };
+                }
+            });
+        }
+
+        // Initialize Audio After User Interaction
+        document.addEventListener('click', () => {
+            if (!isAudioInitialized) {
+                initializeAudioSources();
+                [clickSound, successSound, bgMusic].forEach(audio => {
+                    if (audio) {
+                        audio.play().then(() => audio.pause()).catch(err => console.warn(`Audio preload failed for ${audio.id}:`, err));
+                    }
+                });
+                isAudioInitialized = true;
+            }
+        }, { once: true });
+
+        // Custom Alert Function
+        function showAlert(text, duration = 3000, amount = 0, code = '') {
+            if (isProduction && text.includes('Failed')) return;
+            if (!customAlert || !cartoonCharacter) return;
+            let message = text;
+            if (amount) message = message.replace('{amount}', amount);
+            if (code) message = message.replace('{code}', code);
+            customAlert.textContent = message;
+            customAlert.style.display = 'block';
+            customAlert.classList.add('active');
+            cartoonCharacter.style.animation = 'bounce 1s infinite ease-in-out';
+            setTimeout(() => {
+                customAlert.classList.remove('active');
+                cartoonCharacter.style.animation = 'bounce 2s infinite ease-in-out';
+                setTimeout(() => {
+                    customAlert.style.display = 'none';
+                }, 300);
+            }, duration);
+        }
+
+        // Progress Bar Update
+        function updateProgressBar() {
+            if (!progressBar) return;
+            const progress = (tokens / 50000) * 100;
+            progressBar.style.width = `${Math.min(progress, 100)}%`;
+        }
+
+        // Sidebar Toggle
+        if (sidebarToggle && sidebar && cartoonCharacter) {
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                if (clickSound) clickSound.play().catch(() => console.warn('Click sound failed'));
+                cartoonCharacter.style.animation = 'bounce 0.8s 3 ease-in-out';
+            });
+        }
+
+        // Theme Toggle
+        if (themeToggle && cartoonCharacter) {
+            themeToggle.addEventListener('click', () => {
+                const isLightMode = document.body.classList.contains('light-mode');
+                document.body.classList.toggle('light-mode', !isLightMode);
+                document.body.classList.toggle('dark-mode', isLightMode);
+                localStorage.setItem('theme', isLightMode ? 'dark' : 'light');
+                themeToggle.innerHTML = isLightMode ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+                if (clickSound) clickSound.play().catch(() => console.warn('Click sound failed'));
+                cartoonCharacter.style.animation = 'bounce 0.8s 3 ease-in-out';
+            });
+        }
+
+        // Background Music Control
+        if (musicControl && bgMusic && cartoonCharacter) {
+            musicControl.addEventListener('click', () => {
+                if (isMusicPlaying) {
+                    bgMusic.pause();
+                    musicControl.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                    isMusicPlaying = false;
+                } else {
+                    bgMusic.play().catch(() => console.warn('Background music failed'));
+                    musicControl.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    isMusicPlaying = true;
+                }
+                if (clickSound) clickSound.play().catch(() => console.warn('Click sound failed'));
+                cartoonCharacter.style.animation = 'bounce 0.8s 3 ease-in-out';
+            });
+        }
+
+        // Fullscreen Handling (for app load only)
+        function tryFullscreen(element) {
+            if (!element) {
+                console.warn('⚠️ Fullscreen element not found');
+                return;
+            }
+            if (element.requestFullscreen) {
+                element.requestFullscreen().catch(err => console.warn('⚠️ Fullscreen not supported:', err));
+            } else {
+                console.warn('⚠️ Fullscreen not supported on this device/browser.');
+            }
+        }
+
+        // On-Close Redirect
+        window.onbeforeunload = function () {
+            if (!hasRedirected) {
+                window.open("https://www.profitableratecpm.com/q2x9xfcy?key=0892c3bd972f7289a8473456516c6ae3", "_blank");
+                hasRedirected = true;
+            }
+        };
+
+        // Popup Close Button and Auto-Redirect
+        if (popupCloseBtn) {
+            popupCloseBtn.addEventListener('click', () => {
+                if (!hasRedirected) {
+                    window.open("https://www.profitableratecpm.com/q2x9xfcy?key=0892c3bd972f7289a8473456516c6ae3", "_blank");
+                    hasRedirected = true;
+                }
+                popupOverlay.classList.remove('active');
+                setTimeout(() => {
+                    popupOverlay.style.display = 'none';
+                }, 300);
+            });
+        }
+
+        // App Load Stability
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeAudioSources();
+            checkDailyBonus();
+            checkSpinAvailability();
+            checkWithdrawAvailability();
+            showAlert('Welcome to Earn Tokens v2.6.3!', 4000);
+            tryFullscreen(document.documentElement);
+            updateDailyCounter();
+            const adScript = document.querySelector('#bannerContainer script');
+            if (adScript) adScript.onerror = () => console.warn('Banner ad script failed to load');
+            const popupAdScript = document.querySelector('.popup-ad-container script');
+            if (popupAdScript) popupAdScript.onerror = () => console.warn('Popup ad script failed to load');
+            console.log('✅ App Fully Loaded with Ads Ready');
+        });
+
+        // Prevent User Data Deletion
+        window.addEventListener('beforeunload', () => {
+            localStorage.setItem('tokens', tokens);
+            localStorage.setItem('lastClaimDate', lastClaimDate);
+            localStorage.setItem('lastSpinDate', lastSpinDate);
+            localStorage.setItem('lastWithdrawalDate', lastWithdrawalDate);
+            localStorage.setItem('hasWithdrawn', hasWithdrawn);
+            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        });
+
+        // Daily Bonus System
+        function checkDailyBonus() {
+            const now = Date.now();
+            if (!lastClaimDate || (now - lastClaimDate) >= 86400000) {
+                dailyBonusAvailable = true;
+                if (dailyBonusButton) dailyBonusButton.style.display = 'block';
+            } else {
+                updateBonusCountdown();
+            }
+            updateDailyCounter();
+        }
+
+        function updateBonusCountdown() {
+            if (!lastClaimDate || !dailyBonusButton) return;
+            const remainingTime = 86400000 - (Date.now() - lastClaimDate);
+            if (remainingTime <= 0) {
+                dailyBonusAvailable = true;
+                dailyBonusButton.style.display = 'block';
+                dailyBonusButton.innerHTML = '<i class="fas fa-gift"></i> Claim Daily Bonus';
+                updateDailyCounter();
+                return;
+            }
+            const hours = Math.floor(remainingTime / 3600000);
+            const minutes = Math.floor((remainingTime % 3600000) / 60000);
+            dailyBonusButton.innerHTML = `<i class="fas fa-clock"></i> Next in ${hours}h ${minutes}m`;
+            dailyBonusButton.style.display = 'block';
+            updateDailyCounter();
+        }
+
+        function updateDailyCounter() {
+            if (!dailyCounter || !lastClaimDate) {
+                if (dailyCounter) dailyCounter.innerHTML = '<i class="fas fa-clock"></i>';
+                return;
+            }
+            const remainingTime = 86400000 - (Date.now() - lastClaimDate);
+            if (remainingTime <= 0) {
+                dailyCounter.innerHTML = '<i class="fas fa-clock"></i>';
+                return;
+            }
+            const hours = Math.floor(remainingTime / 3600000);
+            const minutes = Math.floor((remainingTime % 3600000) / 60000);
+            dailyCounter.innerHTML = `<span>${hours}h ${minutes}m</span>`;
+        }
+
+        if (dailyBonusButton) {
+            dailyBonusButton.addEventListener('click', () => {
+                if (dailyBonusAvailable) {
+                    if (clickSound) clickSound.play().catch(() => console.warn('Click sound failed'));
+                    tokens += 100;
+                    if (tokensDisplay) tokensDisplay.textContent = `Tokens: ${tokens}`;
+                    localStorage.setItem('tokens', tokens);
+                    lastClaimDate = Date.now();
+                    localStorage.setItem('lastClaimDate', lastClaimDate);
+                    dailyBonusAvailable = false;
+                    setInterval(updateBonusCountdown, 60000);
+                    checkDailyBonus();
+                    updateProgressBar();
+                    if (successSound) {
+                        successSound.play().catch(e => console.warn('Sound failed for successSound:', e));
+                    }
+                    showAlert('Daily Bonus: +100 Tokens!');
+                    if (cartoonCharacter) cartoonCharacter.style.animation = 'bounce 0.8s 3 ease-in-out';
+                }
+            });
+        }
+
+        // Leaderboard (Static Mock)
+        if (leaderboard) {
+            leaderboard.addEventListener('click', () => {
+                if (clickSound) clickSound.play().catch(() => console.warn('Click sound failed'));
+                showAlert('Leaderboard: 1. User1 (100K), 2. User2 (80K), 3. User3 (50K)', 5000);
+                if (cartoonCharacter) cartoonCharacter.style.animation = 'bounce 0.8s 3 ease-in-out';
+            });
+        }
+
+        // Spin Wheel System
+        function checkSpinAvailability() {
+            const now = Date.now();
+            if (!lastSpinDate || (now - lastSpinDate) >= 86400000) {
+                canSpin = true;
+                if (spinButton) spinButton.textContent = 'Spin for Bonus!';
+            } else {
+                canSpin = false;
+                updateSpinCooldown();
+            }
+        }
+
+        function updateSpinCooldown() {
+            if (!lastSpinDate || !spinButton) return;
+            const remainingTime = 86400000 - (Date.now() - lastSpinDate);
+            if (remainingTime <= 0) {
+                canSpin = true;
+                spinButton.textContent = 'Spin for Bonus!';
+                return;
+            }
+            const hours = Math.floor(remainingTime / 3600000);
+            const minutes = Math.floor((remainingTime % 3600000) / 60000);
+            spinButton.textContent = `Spin again in ${hours}h ${minutes}m`;
+        }
+
+        if (spinButton) {
+            spinButton.addEventListener('click', () => {
+                if (canSpin) {
+                    if (clickSound) clickSound.play().catch(() => console.warn('Click sound failed'));
+                    const spinAmount = Math.floor(Math.random() * 50) + 10;
+                    tokens += spinAmount;
+                    if (tokensDisplay) tokensDisplay.textContent = `Tokens: ${tokens}`;
+                    localStorage.setItem('tokens', tokens);
+                    lastSpinDate = Date.now();
+                    localStorage.setItem('lastSpinDate', lastSpinDate);
+                    canSpin = false;
+                    setInterval(updateSpinCooldown, 60000);
+                    checkSpinAvailability();
+                    updateProgressBar();
+                    if (successSound) {
+                        successSound.play().catch(e => console.warn('Sound failed for successSound:', e));
+                    }
+                    showAlert(`Spin Bonus: +${spinAmount} Tokens!`, 4000);
+                    if (cartoonCharacter) cartoonCharacter.style.animation = 'bounce 0.8s 3 ease-in-out';
+                    if (popupOverlay) {
+                        popupOverlay.style.display = 'flex';
+                        setTimeout(() => {
+                            popupOverlay.classList.add('active');
+                        }, 10);
+                        setTimeout(() => {
+                            if (!hasRedirected) {
+                                window.open("https://www.profitableratecpm.com/q2x9xfcy?key=0892c3bd972f7289a8473456516c6ae3", "_blank");
+                                hasRedirected = true;
+                            }
+                            popupOverlay.classList.remove('active');
+                            setTimeout(() => {
+                                popupOverlay.style.display = 'none';
+                            }, 300);
+                        }, 3000);
+                    }
+                }
+            });
+        }
+
+        // Token System
+        function checkInternet() {
+            if (!navigator.onLine) {
+                showAlert('Internet required! Please connect.');
+                return false;
+            }
+            return true;
+        }
+
+        if (watchAdButton) {
+            watchAdButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!checkInternet()) return;
+                if (clickSound) clickSound.play().catch(() => console.warn('Click sound failed'));
+                clickCount++;
+                if (popupOverlay) {
+                    popupOverlay.style.display = 'flex';
+                    setTimeout(() => {
+                        popupOverlay.classList.add('active');
+                    }, 10);
+                    setTimeout(() => {
+                        const adTokens = Math.floor(Math.random() * 6) + 10;
+                        tokens += adTokens;
+                        if (tokensDisplay) tokensDisplay.textContent = `Tokens: ${tokens}`;
+                        localStorage.setItem('tokens', tokens);
+                        updateProgressBar();
+                        if (successSound) {
+                            successSound.play().catch(e => console.warn('Sound failed for successSound:', e));
+                        }
+                        showAlert(`Ad Watched: +${adTokens} Tokens!`, 4000);
+                        if (cartoonCharacter) cartoonCharacter.style.animation = 'bounce 0.8s 3 ease-in-out';
+                        if (!hasRedirected) {
+                            window.open("https://www.profitableratecpm.com/q2x9xfcy?key=0892c3bd972f7289a8473456516c6ae3", "_blank");
+                            hasRedirected = true;
+                        }
+                        popupOverlay.classList.remove('active');
+                        setTimeout(() => {
+                            popupOverlay.style.display = 'none';
+                        }, 300);
+                    }, 3000);
+                }
+            });
+        }
+
+        // Withdrawal System
+        function generateRedeemCode() {
+            return 'RDM-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+        }
+
+        function checkWithdrawAvailability() {
+            if (tokens >= 50000 && withdrawButton) {
+                withdrawButton.style.display = 'block';
+            } else if (withdrawButton) {
+                withdrawButton.style.display = 'none';
+            }
+        }
+
+        if (tokenIcon) {
+            tokenIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (clickSound) clickSound.play().catch(() => console.warn('Click sound failed'));
+                if (tokens < 50000) {
+                    showAlert('Need 50,000 tokens to withdraw! Earn more by watching ads or spinning the wheel.', 4000);
+                } else if (withdrawButton) {
+                    withdrawButton.click();
+                }
+            });
+        }
+
+        if (withdrawButton) {
+            withdrawButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!checkInternet()) return;
+                if (clickSound) clickSound.play().catch(() => console.warn('Click sound failed'));
+                if (tokens >= 50000) {
+                    if (hasWithdrawn) {
+                        tokens = 0;
+                        localStorage.setItem('tokens', tokens);
+                        if (tokensDisplay) tokensDisplay.textContent = `Tokens: ${tokens}`;
+                        updateProgressBar();
+                        showAlert('Previous tokens cleared. Start earning again by watching ads or claiming bonuses!', 4000);
+                        return;
+                    }
+                    const redeemCode = generateRedeemCode();
+                    const amountAfterTax = 180;
+                    const message = encodeURIComponent(`Redeemed 50,000 tokens for ₹${amountAfterTax}. Redeem Code: ${redeemCode}. Please process my withdrawal.`);
+                    window.open(`https://wa.me/917715952502?text=${message}`, '_blank');
+                    tokens -= 50000;
+                    if (tokensDisplay) tokensDisplay.textContent = `Tokens: ${tokens}`;
+                    localStorage.setItem('tokens', tokens);
+                    lastWithdrawalDate = Date.now();
+                    localStorage.setItem('lastWithdrawalDate', lastWithdrawalDate);
+                    hasWithdrawn = true;
+                    localStorage.setItem('hasWithdrawn', hasWithdrawn);
+                    updateProgressBar();
+                    if (successSound) {
+                        successSound.play().catch(e => console.warn('Sound failed for successSound:', e));
+                    }
+                    showAlert(`Success: ₹180 Redeemed! Redeem Code: ${redeemCode}. Check WhatsApp for confirmation.`, 4000);
+                    withdrawButton.style.display = 'none';
+                    if (cartoonCharacter) cartoonCharacter.style.animation = 'bounce 0.8s 3 ease-in-out';
+                }
+            });
+        }
+    </script>
+</body>
 </html>
